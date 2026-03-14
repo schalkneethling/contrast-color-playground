@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>contrast-color() Playground — Explore CSS Automatic Contrast</title>
+
+    <meta
+      name="description"
+      content="An interactive playground to experiment with the CSS contrast-color() function. See how browsers automatically choose black or white text for any background color."
+    />
+
+    <meta property="og:title" content="contrast-color() CSS Playground" />
+    <meta
+      property="og:description"
+      content="Explore the power of CSS contrast-color() — automatic accessible text colors for any background."
+    />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" type="text/css" href="/src/css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="/src/css/contrast-color-playground.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <h1><span class="title-fn">contrast-color</span><span class="title-parens">()</span></h1>
+      <p class="subtitle">
+        The CSS function that automatically picks <strong>black</strong> or
+        <strong>white</strong> for maximum contrast against any background.
+        <span class="baseline-badge">Baseline 2026</span>
+      </p>
+    </header>
+
+    <section id="unsupported-notice" class="unsupported-notice" hidden>
+      <div class="notice-content">
+        <h2>Your browser does not yet support <code>contrast-color()</code></h2>
+        <p>
+          This playground requires native browser support for the
+          <code>contrast-color()</code> CSS function. It is available in:
+        </p>
+        <ul>
+          <li>Chrome 147+</li>
+          <li>Safari 26+</li>
+          <li>Firefox 146+</li>
+        </ul>
+        <p>
+          Learn more:
+          <a href="https://drafts.csswg.org/css-color-5/#contrast-color" rel="noopener noreferrer"
+            >CSS Specification</a
+          >
+          &middot;
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value/contrast-color"
+            rel="noopener noreferrer"
+            >MDN Documentation</a
+          >
+        </p>
+      </div>
+    </section>
+
+    <main>
+      <contrast-color-playground>
+        <!-- Section 1: Live Color Picker -->
+        <section class="playground-section" aria-labelledby="picker-heading">
+          <header class="section-header">
+            <h2 id="picker-heading">Live Color Picker</h2>
+            <p class="section-description">
+              Choose any background color and see
+              <code>contrast-color()</code> in action.
+            </p>
+          </header>
+
+          <div class="picker-controls">
+            <label for="color-picker">Background color</label>
+            <div class="picker-input-group">
+              <input type="color" id="color-picker" value="#6633cc" />
+              <label for="color-text-input" class="visually-hidden">Or type a color value</label>
+              <input
+                type="text"
+                id="color-text-input"
+                value="#6633cc"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div id="picker-preview" class="preview-panel" style="--bg: #6633cc">
+            <p class="preview-sample-text">The quick brown fox jumps over the lazy dog</p>
+            <div class="preview-meta">
+              <span class="meta-label">Input</span>
+              <code id="picker-color-value">#6633cc</code>
+              <span class="meta-label">Returns</span>
+              <code id="picker-contrast-result" class="contrast-result">white</code>
+            </div>
+          </div>
+
+          <div class="code-snippet">
+            <pre><code><span class="code-prop">background</span>: <span class="code-val">#6633cc</span>;
+<span class="code-prop">color</span>: <span class="code-fn">contrast-color</span>(<span class="code-val">#6633cc</span>);</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 2: Preset Palette Gallery -->
+        <section class="playground-section" aria-labelledby="palette-heading">
+          <header class="section-header">
+            <h2 id="palette-heading">Palette Gallery</h2>
+            <p class="section-description">
+              See how <code>contrast-color()</code> responds across the spectrum. Click any swatch
+              to copy its value.
+            </p>
+          </header>
+          <p class="visually-hidden" aria-live="polite" id="copy-status"></p>
+          <ul class="palette-grid" id="palette-grid"></ul>
+        </section>
+
+        <!-- Section 3: Advanced Techniques -->
+        <section class="playground-section" aria-labelledby="advanced-heading">
+          <header class="section-header">
+            <h2 id="advanced-heading">Advanced Techniques</h2>
+            <p class="section-description">
+              Go beyond black and white with
+              <code>color-mix()</code> tinting and style query detection.
+            </p>
+          </header>
+
+          <!-- 3a: Tinting with color-mix() -->
+          <article class="technique-card" aria-labelledby="tint-heading">
+            <h3 id="tint-heading">Tinting with color-mix()</h3>
+            <p>
+              Blend the background color into the contrast result to create
+              <em>branded</em> text instead of pure black or white.
+            </p>
+
+            <div class="tint-controls">
+              <label for="tint-color-picker">Background color</label>
+              <div class="picker-input-group">
+                <input type="color" id="tint-color-picker" value="#6c1afb" />
+                <label for="tint-color-text" class="visually-hidden">Or type a color value</label>
+                <input
+                  type="text"
+                  id="tint-color-text"
+                  value="#6c1afb"
+                  spellcheck="false"
+                  autocomplete="off"
+                />
+              </div>
+
+              <label for="tint-slider">Tint amount: <output id="tint-value">15</output>%</label>
+              <input type="range" id="tint-slider" min="0" max="50" value="15" />
+            </div>
+
+            <div class="tint-comparison">
+              <div
+                class="tint-preview tint-preview-pure"
+                id="tint-preview-pure"
+                style="--bg: #6c1afb"
+              >
+                <span class="tint-label">Pure contrast-color()</span>
+                <p class="preview-sample-text">Sample text</p>
+              </div>
+              <div
+                class="tint-preview tint-preview-mixed"
+                id="tint-preview-mixed"
+                style="--bg: #6c1afb; --tint-pct: 15%"
+              >
+                <span class="tint-label">Tinted with color-mix()</span>
+                <p class="preview-sample-text">Sample text</p>
+              </div>
+            </div>
+
+            <div class="code-snippet">
+              <pre><code id="tint-code-output"><span class="code-prop">color</span>: <span class="code-fn">color-mix</span>(in oklch, <span class="code-val">#6c1afb</span> <span class="code-val">15%</span>, <span class="code-fn">contrast-color</span>(<span class="code-val">#6c1afb</span>));</code></pre>
+            </div>
+          </article>
+
+          <!-- 3b: Style Queries Detection -->
+          <article class="technique-card" aria-labelledby="style-query-heading">
+            <h3 id="style-query-heading">Light/Dark Detection with Style Queries</h3>
+            <p>
+              Use <code>contrast-color()</code> as an intelligent light/dark detector. Register it
+              as a custom property, then use style queries to switch entire palettes.
+            </p>
+
+            <div class="style-query-demo" id="style-query-demo">
+              <div class="style-query-controls">
+                <label for="style-query-picker">Background color</label>
+                <div class="picker-input-group">
+                  <input type="color" id="style-query-picker" value="#2196f3" />
+                  <label for="style-query-text" class="visually-hidden"
+                    >Or type a color value</label
+                  >
+                  <input
+                    type="text"
+                    id="style-query-text"
+                    value="#2196f3"
+                    spellcheck="false"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="style-query-card-container"
+                id="style-query-container"
+                style="--bg: #2196f3"
+              >
+                <div class="style-query-card">
+                  <h4 class="style-query-card-title">Dynamic Card</h4>
+                  <p class="style-query-card-body">
+                    This card detects whether its background is light or dark, then applies an
+                    entirely different color palette — not just black or white.
+                  </p>
+                  <span class="style-query-badge">Auto-themed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="code-snippet">
+              <pre><code><span class="code-kw">@property</span> <span class="code-val">--contrast</span> {
+  <span class="code-prop">syntax</span>: <span class="code-str">"&lt;color&gt;"</span>;
+  <span class="code-prop">initial-value</span>: white;
+  <span class="code-prop">inherits</span>: true;
+}
+
+<span class="code-sel">.container</span> {
+  <span class="code-prop">--bg</span>: <span class="code-val">var(--brand-color)</span>;
+  <span class="code-prop">--contrast</span>: <span class="code-fn">contrast-color</span>(<span class="code-val">var(--bg)</span>);
+  <span class="code-prop">background</span>: <span class="code-val">var(--bg)</span>;
+}
+
+<span class="code-kw">@container</span> <span class="code-fn">style</span>(<span class="code-prop">--contrast</span>: white) {
+  <span class="code-sel">.card-title</span> { <span class="code-prop">color</span>: <span class="code-val">antiquewhite</span>; }
+  <span class="code-sel">.badge</span> { <span class="code-prop">background</span>: <span class="code-fn">oklch</span>(<span class="code-val">0.85 0.05 80</span>); }
+}
+
+<span class="code-kw">@container</span> <span class="code-fn">style</span>(<span class="code-prop">--contrast</span>: black) {
+  <span class="code-sel">.card-title</span> { <span class="code-prop">color</span>: <span class="code-val">midnightblue</span>; }
+  <span class="code-sel">.badge</span> { <span class="code-prop">background</span>: <span class="code-fn">oklch</span>(<span class="code-val">0.3 0.1 260</span>); }
+}</code></pre>
+            </div>
+          </article>
+        </section>
+
+        <!-- Section 4: Card Builder -->
+        <section class="playground-section" aria-labelledby="card-heading">
+          <header class="section-header">
+            <h2 id="card-heading">Card Builder</h2>
+            <p class="section-description">
+              Build a real-world card component with automatic contrast. Pick a background and watch
+              everything adapt.
+            </p>
+          </header>
+
+          <div class="card-builder-controls">
+            <label for="card-bg-picker">Card background</label>
+            <div class="picker-input-group">
+              <input type="color" id="card-bg-picker" value="#1a5c2e" />
+              <label for="card-bg-text" class="visually-hidden">Or type a color value</label>
+              <input
+                type="text"
+                id="card-bg-text"
+                value="#1a5c2e"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="card-demo" id="card-preview" style="--card-bg: #1a5c2e">
+            <div class="demo-card">
+              <h3 class="demo-card-heading">Event Announcement</h3>
+              <p class="demo-card-body">
+                Join us for an evening of creative coding and web platform exploration. Light
+                refreshments provided.
+              </p>
+              <button class="demo-card-button" type="button">Register Now</button>
+            </div>
+          </div>
+
+          <div class="code-snippet">
+            <pre><code id="card-code-output"><span class="code-sel">.card</span> {
+  <span class="code-prop">--card-bg</span>: <span class="code-val">#1a5c2e</span>;
+  <span class="code-prop">background</span>: <span class="code-val">var(--card-bg)</span>;
+  <span class="code-prop">color</span>: <span class="code-fn">contrast-color</span>(<span class="code-val">var(--card-bg)</span>);
+}
+
+<span class="code-sel">.card-button</span> {
+  <span class="code-prop">background</span>: <span class="code-fn">contrast-color</span>(<span class="code-val">var(--card-bg)</span>);
+  <span class="code-prop">color</span>: <span class="code-val">var(--card-bg)</span>;
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 5: Feature Detection -->
+        <section class="playground-section" aria-labelledby="detection-heading">
+          <header class="section-header">
+            <h2 id="detection-heading">Feature Detection</h2>
+            <p class="section-description">
+              Ship <code>contrast-color()</code> today with progressive enhancement.
+            </p>
+          </header>
+
+          <div class="detection-result" id="detection-result">
+            <span class="detection-icon" id="detection-icon" aria-hidden="true"></span>
+            <p id="detection-message"></p>
+          </div>
+
+          <div class="detection-methods">
+            <div class="code-snippet">
+              <h3>CSS — <code>@supports</code></h3>
+              <pre><code><span class="code-kw">@supports</span> (<span class="code-prop">color</span>: <span class="code-fn">contrast-color</span>(red)) {
+  <span class="code-sel">.element</span> {
+    <span class="code-prop">color</span>: <span class="code-fn">contrast-color</span>(<span class="code-val">var(--bg)</span>);
+  }
+}</code></pre>
+            </div>
+
+            <div class="code-snippet">
+              <h3>JavaScript</h3>
+              <pre><code><span class="code-kw">if</span> (CSS.<span class="code-fn">supports</span>(<span class="code-str">"color"</span>, <span class="code-str">"contrast-color(red)"</span>)) {
+  <span class="code-comment">// contrast-color() is available</span>
+}</code></pre>
+            </div>
+          </div>
+        </section>
+      </contrast-color-playground>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Built with love, web components, and
+        <code>contrast-color()</code> by
+        <a href="https://github.com/schalkneethling">Schalk Neethling</a>
+      </p>
+    </footer>
+
+    <script type="module" src="/src/js/contrast-color-playground.js"></script>
+  </body>
+</html>
