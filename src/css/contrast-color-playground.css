@@ -128,12 +128,12 @@ strong {
 }
 
 .baseline-badge {
+  --baseline-badge-color: #212121;
+
   background-color: var(--accent);
   border: 1px solid oklch(82% 0.16 85deg / 30%);
   border-radius: 2rem;
-
-  /* stylelint-disable-next-line declaration-property-value-no-unknown */
-  color: contrast-color(var(--accent));
+  color: var(--baseline-badge-color);
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 600;
@@ -143,6 +143,12 @@ strong {
   padding-inline: 0.75rem;
   text-transform: uppercase;
   vertical-align: middle;
+}
+
+@supports (color: contrast-color(rebeccapurple)) {
+  .baseline-badge {
+    --baseline-badge-color: contrast-color(var(--accent));
+  }
 }
 
 /* ---- Unsupported Notice ---- */
