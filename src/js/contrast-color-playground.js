@@ -7,9 +7,18 @@ class ContrastColorPlayground extends HTMLElement {
     pickerColorValue: "#picker-color-value",
     pickerContrastResult: "#picker-contrast-result",
 
-    // Palette Gallery
+    // Palette Generator
     paletteGrid: "#palette-grid",
+    paletteBasePicker: "#palette-base-picker",
+    paletteBaseText: "#palette-base-text",
+    lightnessStep: "#lightness-step",
+    lightnessStepValue: "#lightness-step-value",
     copyStatus: "#copy-status",
+
+    // Icons
+    iconsBgPicker: "#icons-bg-picker",
+    iconsBgText: "#icons-bg-text",
+    iconsPreview: "#icons-preview",
 
     // Tinting
     tintColorPicker: "#tint-color-picker",
@@ -39,71 +48,6 @@ class ContrastColorPlayground extends HTMLElement {
     // Unsupported Notice
     unsupportedNotice: "#unsupported-notice",
   };
-
-  static #presetColors = [
-    // Light colors
-    { name: "White", value: "white", format: "named" },
-    { name: "Lightyellow", value: "lightyellow", format: "named" },
-    { name: "Lavender", value: "lavender", format: "named" },
-    { name: "Mintcream", value: "mintcream", format: "named" },
-    { name: "Nearly White", value: "#f0f0f0", format: "hex" },
-    { name: "Cornsilk", value: "cornsilk", format: "named" },
-
-    // Dark colors
-    { name: "Black", value: "black", format: "named" },
-    { name: "Navy", value: "navy", format: "named" },
-    { name: "Darkslategray", value: "darkslategray", format: "named" },
-    { name: "Indigo", value: "indigo", format: "named" },
-    { name: "Near Black", value: "#1a1a2e", format: "hex" },
-    { name: "Midnightblue", value: "midnightblue", format: "named" },
-
-    // Saturated colors
-    { name: "Red", value: "red", format: "named" },
-    { name: "Blue", value: "blue", format: "named" },
-    { name: "Rebeccapurple", value: "rebeccapurple", format: "named" },
-    { name: "Coral", value: "coral", format: "named" },
-    { name: "Teal", value: "teal", format: "named" },
-    { name: "Gold", value: "gold", format: "named" },
-    { name: "Tomato", value: "tomato", format: "named" },
-    { name: "Vivid Orange", value: "#ff6600", format: "hex" },
-    { name: "Deeppink", value: "deeppink", format: "named" },
-
-    // Mid-tones (tricky)
-    { name: "Gray", value: "gray", format: "named", midtone: true },
-    { name: "Mid Gray", value: "#808080", format: "hex", midtone: true },
-    { name: "Rosybrown", value: "rosybrown", format: "named", midtone: true },
-    { name: "Darkkhaki", value: "darkkhaki", format: "named", midtone: true },
-    {
-      name: "Mediumpurple",
-      value: "mediumpurple",
-      format: "named",
-      midtone: true,
-    },
-    { name: "Peru", value: "peru", format: "named", midtone: true },
-
-    // oklch colors
-    {
-      name: "OKLCH Deep Blue",
-      value: "oklch(0.5 0.2 240)",
-      format: "oklch",
-    },
-    {
-      name: "OKLCH Vivid Green",
-      value: "oklch(0.7 0.15 150)",
-      format: "oklch",
-    },
-    {
-      name: "OKLCH Neutral",
-      value: "oklch(0.5 0 0)",
-      format: "oklch",
-      midtone: true,
-    },
-    {
-      name: "OKLCH Warm Light",
-      value: "oklch(0.9 0.05 80)",
-      format: "oklch",
-    },
-  ];
 
   /** @type {Record<string, Element | null>} */
   #elements = {};
@@ -181,69 +125,99 @@ class ContrastColorPlayground extends HTMLElement {
     }
   }
 
-  #renderPaletteGrid() {
+  /**
+   * Generates the lightness ramp recipes based on the given step interval.
+   * @param {number} step - Lightness step percentage (5–25)
+   * @returns {Array<{label: string, css: string}>}
+   */
+  #generateLightnessRamp(step) {
+    /** @type {Array<{label: string, css: string}>} */
+    const ramp = [];
+    let insertedBase = false;
+
+    for (let pct = 95; pct >= 10; pct -= step) {
+      if (!insertedBase && pct <= 50) {
+        ramp.push({ label: "Base", css: "var(--base)" });
+        insertedBase = true;
+      }
+
+      ramp.push({
+        label: `${pct}%`,
+        css: `oklch(from var(--base) ${pct}% c h)`,
+      });
+    }
+
+    if (!insertedBase) {
+      ramp.push({ label: "Base", css: "var(--base)" });
+    }
+
+    return ramp;
+  }
+
+  /** @param {number} [step=15] */
+  #renderPaletteGrid(step = 15) {
     const { paletteGrid } = this.#elements;
 
     if (!paletteGrid) {
       return;
     }
 
+    paletteGrid.textContent = "";
+
+    const lightnessRamp = this.#generateLightnessRamp(step);
     const fragment = document.createDocumentFragment();
 
-    for (const color of ContrastColorPlayground.#presetColors) {
-      const li = document.createElement("li");
-      li.classList.add("palette-swatch");
-      li.setAttribute("role", "button");
-      li.setAttribute("tabindex", "0");
-      li.setAttribute("aria-label", `${color.name}: ${color.value}. Click to copy.`);
-      li.dataset.value = color.value;
-      li.style.setProperty("--swatch-color", color.value);
-
-      const nameSpan = document.createElement("span");
-      nameSpan.classList.add("swatch-name");
-      nameSpan.textContent = color.name;
-      li.appendChild(nameSpan);
-
-      const valueSpan = document.createElement("span");
-      valueSpan.classList.add("swatch-value");
-      valueSpan.textContent = color.value;
-      li.appendChild(valueSpan);
-
-      const indicator = document.createElement("span");
-      indicator.classList.add("swatch-contrast-indicator");
-      indicator.setAttribute("aria-hidden", "true");
-      indicator.textContent = this.#getContrastLabel(color.value);
-      li.appendChild(indicator);
-
-      if (color.midtone) {
-        const badge = document.createElement("span");
-        badge.classList.add("swatch-midtone-badge");
-        badge.textContent = "mid-tone";
-        badge.setAttribute(
-          "title",
-          "Mid-tone colors may not provide optimal contrast with either black or white",
-        );
-        li.appendChild(badge);
-      }
-
-      fragment.appendChild(li);
+    for (const recipe of lightnessRamp) {
+      fragment.appendChild(this.#createSwatch(recipe));
     }
 
     paletteGrid.appendChild(fragment);
   }
 
   /**
-   * Determines whether contrast-color() would return "white" or "black"
-   * for a given color by reading the computed style from a temporary element.
-   * @param {string} _colorValue - CSS color value (unused in label, resolved via CSS)
-   * @returns {string} "white" or "black"
+   * Creates a single palette swatch element.
+   * @param {{label: string, css: string}} recipe
+   * @returns {HTMLLIElement}
    */
-  #getContrastLabel(_colorValue) {
-    // We cannot read contrast-color() results from JS directly,
-    // so we show a static label. The actual rendering is done by CSS.
-    // A more accurate approach would use getComputedStyle on a rendered element,
-    // but at this point the elements aren't in the DOM yet.
-    return "\u25CF"; // bullet as neutral indicator
+  #createSwatch(recipe) {
+    const li = document.createElement("li");
+    li.classList.add("palette-swatch");
+    li.dataset.css = recipe.css;
+    li.dataset.label = recipe.label;
+    li.style.setProperty("--swatch-color", recipe.css);
+
+    const nameSpan = document.createElement("span");
+    nameSpan.classList.add("swatch-name");
+    nameSpan.textContent = recipe.label;
+    li.appendChild(nameSpan);
+
+    const valueSpan = document.createElement("span");
+    valueSpan.classList.add("swatch-value");
+    valueSpan.textContent = recipe.css;
+    li.appendChild(valueSpan);
+
+    const copyButton = document.createElement("button");
+    copyButton.classList.add("swatch-copy-button");
+    copyButton.setAttribute("type", "button");
+    copyButton.setAttribute("aria-label", `Copy CSS for ${recipe.label}`);
+
+    const copyIconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    copyIconSvg.setAttribute("viewBox", "0 -960 960 960");
+    copyIconSvg.setAttribute("aria-hidden", "true");
+    copyIconSvg.classList.add("swatch-copy-icon");
+
+    const copyIconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    copyIconPath.setAttribute("fill", "currentColor");
+    copyIconPath.setAttribute(
+      "d",
+      "M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z",
+    );
+    copyIconSvg.appendChild(copyIconPath);
+    copyButton.appendChild(copyIconSvg);
+
+    li.appendChild(copyButton);
+
+    return li;
   }
 
   #addEventListeners() {
@@ -252,6 +226,27 @@ class ContrastColorPlayground extends HTMLElement {
       this.#elements.colorPicker,
       this.#elements.colorTextInput,
       (value) => this.#updatePickerPreview(value),
+    );
+
+    // Palette Generator — base color
+    this.#addColorPairListeners(
+      this.#elements.paletteBasePicker,
+      this.#elements.paletteBaseText,
+      (value) => this.#updatePaletteBase(value),
+    );
+
+    // Palette Generator — lightness step slider
+    const { lightnessStep } = this.#elements;
+
+    if (lightnessStep) {
+      lightnessStep.addEventListener("input", () => {
+        this.#updateLightnessStep();
+      });
+    }
+
+    // Icons section
+    this.#addColorPairListeners(this.#elements.iconsBgPicker, this.#elements.iconsBgText, (value) =>
+      this.#updateIconsPreview(value),
     );
 
     // Tint section
@@ -281,30 +276,55 @@ class ContrastColorPlayground extends HTMLElement {
       this.#updateCardPreview(value),
     );
 
-    // Palette Grid — delegated click and keyboard
+    // Palette Grid — delegated click on copy buttons
     const { paletteGrid } = this.#elements;
 
     if (paletteGrid) {
       paletteGrid.addEventListener("click", (event) => {
-        const swatch = /** @type {HTMLElement} */ (event.target).closest(".palette-swatch");
+        const button = /** @type {HTMLElement} */ (event.target).closest(".swatch-copy-button");
 
-        if (swatch) {
-          void this.#copySwatchValue(/** @type {HTMLElement} */ (swatch));
-        }
-      });
-
-      paletteGrid.addEventListener("keydown", (e) => {
-        const event = /** @type {KeyboardEvent} */ (e);
-
-        if (event.key === "Enter" || event.key === " ") {
-          const swatch = /** @type {HTMLElement} */ (event.target).closest(".palette-swatch");
+        if (button) {
+          const swatch = /** @type {HTMLElement} */ (button).closest(".palette-swatch");
 
           if (swatch) {
-            event.preventDefault();
             void this.#copySwatchValue(/** @type {HTMLElement} */ (swatch));
           }
         }
       });
+    }
+  }
+
+  /** @param {string} value */
+  #updatePaletteBase(value) {
+    const { paletteGrid } = this.#elements;
+
+    if (paletteGrid) {
+      /** @type {HTMLElement} */ (paletteGrid).style.setProperty("--base", value);
+    }
+  }
+
+  #updateLightnessStep() {
+    const { lightnessStep, lightnessStepValue } = this.#elements;
+
+    if (!lightnessStep) {
+      return;
+    }
+
+    const step = Number(/** @type {HTMLInputElement} */ (lightnessStep).value);
+
+    if (lightnessStepValue) {
+      lightnessStepValue.textContent = String(step);
+    }
+
+    this.#renderPaletteGrid(step);
+  }
+
+  /** @param {string} color */
+  #updateIconsPreview(color) {
+    const { iconsPreview } = this.#elements;
+
+    if (iconsPreview) {
+      /** @type {HTMLElement} */ (iconsPreview).style.setProperty("--icons-bg", color);
     }
   }
 
@@ -465,20 +485,23 @@ class ContrastColorPlayground extends HTMLElement {
 
   /** @param {HTMLElement} swatch */
   async #copySwatchValue(swatch) {
-    const value = swatch.dataset.value;
+    const cssExpr = swatch.dataset.css;
+    const label = swatch.dataset.label || cssExpr;
 
-    if (!value) {
+    if (!cssExpr) {
       return;
     }
 
-    await navigator.clipboard.writeText(value);
+    const cssText = `background-color: ${cssExpr};\ncolor: contrast-color(${cssExpr});`;
+
+    await navigator.clipboard.writeText(cssText);
 
     swatch.setAttribute("data-copied", "");
 
     const { copyStatus } = this.#elements;
 
     if (copyStatus) {
-      copyStatus.textContent = `Copied ${value} to clipboard`;
+      copyStatus.textContent = `Copied CSS for ${label} to clipboard`;
     }
 
     if (this.#copyResetTimeout) {
